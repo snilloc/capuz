@@ -1,0 +1,77 @@
+<configuration debug="true" packagingData="true" >
+
+    <!-- Disable all the logback noise due to problems in graylog config -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+    <!-- <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" /> -->
+
+    <logger name="javax.management" level="ERROR" />
+    <logger name="org.jboss.netty" level="ERROR" />
+    <logger name="com.google.inject.internal.BytecodeGen" level="ERROR" />
+    <logger name="com.sun.jersey" level="ERROR" />
+    <logger name="com.ning.http" level="ERROR" />
+    <logger name="com.mchange" level="ERROR" />
+    <logger name="org.lwes" level="ERROR" />
+    <logger name="com.google.inject" level="ERROR" />
+    <logger name="net.sf" level="ERROR" />
+
+    <logger name="unit.controllers" level="ERROR" />
+    <logger name="io.swagger.client" level="ERROR" />
+
+    <logger name="akka" level="ERROR" />
+    <logger name="play" level="INFO" />
+    <logger name="application" level="INFO" />
+    <logger name="controllers" level="INFO" />
+    <logger name="utils" level="INFO" />
+    <logger name="clients" level="INFO" />
+    <logger name="models" level="INFO" />
+    <logger name="actors" level="INFO" />
+    <logger name="QueryLog" level="INFO" />
+
+    <conversionRule conversionWord="coloredLevel" converterClass="play.api.Logger$ColoredLevel" />
+
+    <appender name="FILENP" class="ch.qos.logback.core.FileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <file>logs/app_trace.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSX} [%thread] %-5coloredLevel %logger{36} rid:%X{rid} - %message%n%xException</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUTNP" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSX} [%thread] %-5coloredLevel %logger{36} rid:%X{rid} - %message%n%xException</pattern>
+        </encoder>
+    </appender>
+
+    <!-- This is TCP appender  - prod may be using UDP -->
+    <appender name="GRAYLOG2NP" class="de.siegmar.logbackgelf.GelfTcpAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <graylogHost>graylog-dev-1.np.st1.yellowpages.com</graylogHost>
+        <graylogPort>5555</graylogPort>
+        <encoder class="de.siegmar.logbackgelf.GelfEncoder">
+            <includeRawMessage>false</includeRawMessage>
+            <includeMarker>true</includeMarker>
+            <includeMdcData>true</includeMdcData>
+            <includeCallerData>true</includeCallerData>
+            <includeRootCauseData>true</includeRootCauseData>
+            <includeLevelName>true</includeLevelName>
+            <staticField>app_name:gump2</staticField>
+            <staticField>data_center:${DATACENTER}</staticField>
+            <staticField>environment:${ENVIRONMENT}</staticField>
+            <staticField>version:${PACKAGE_VERSION}</staticField>
+        </encoder>
+    </appender>
+
+    <root level="TRACE">
+        <appender-ref ref="FILENP" />
+        <appender-ref ref="STDOUTNP" />
+    </root>
+
+</configuration>
