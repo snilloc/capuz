@@ -3,7 +3,7 @@ package cup.utils
 import play.api.Logger
 import play.api.libs.json.JsObject
 
-case class JsonHelper(json:JsObject) {
+case class JsonHelper(json: JsObject) {
 
   private val logger = Logger(this.getClass)
 

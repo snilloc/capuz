@@ -37,11 +37,6 @@ RUN yum groupinstall -y "Development Tools"
 
 RUN localedef --quiet -v -c -i en_US -f UTF-8 en_US.UTF-8 | true
 
-# Install tpkg
-#RUN yum -y install ruby
-#RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
-#RUN curl -sSL https://get.rvm.io | bash -s stable
-
 #RUN bash -c "mkdir -p /tpkg_install && \
 #   cd /tpkg_install && \
 #   curl -LO https://rubygems.org/downloads/tpkg-2.3.5.gem && \
@@ -58,22 +53,14 @@ ENV LANGUAGE en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 ENV TZ UTC
 ENV NLS_LANG american_america.UTF8
-
-# Install nodejs for play to use to compile javascript
-#ADD dependencies/http-parser-2.7.1-3.el7.x86_64.rpm /tmp
-#RUN yum install -y /tmp/http-parser-2.7.1-3.el7.x86_64.rpm && rm -f /tmp/http-parser-2.7.1-3.el7.x86_64.rpm
-#RUN yum -y install nodejs
-
 ENV PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/tpkg_install/bin
 
 # maven sometimes installs old jdk
 RUN yum -y remove java-1.7.0-openjdk java-1.7.0-openjdk-headless
 
 # install libs for graphviz; gts needs glib2-devel
-RUN yum -y install graphviz-dev graphviz-gd gd-devel fontconfig libpng-devel freetype-devel libtiff-devel libgd-dev
-RUN yum -y install glib2-devel lua-devel
-RUN yum clean all
-
+#RUN yum -y install graphviz-dev graphviz-gd gd-devel fontconfig libpng-devel freetype-devel libtiff-devel libgd-dev
+#RUN yum -y install glib2-devel lua-devel
 # GTS is required for graphviz sfdf  see http://gts.sourceforge.net/install.html
 #RUN bash -c "cd /tmp && \
 #    curl -LO "http://gts.sourceforge.net/tarballs/gts-snapshot-121130.tar.gz" && \
@@ -82,7 +69,6 @@ RUN yum clean all
 #    ./configure && make && make install && \
 #    rm -rf /tmp/gts-snapshot-121130 && \
 #    rm /tmp/gts-snapshot-121130.tar.gz"
-
 # Unfortunately, graphviz team quit building binaries - this is the hard way
 #RUN bash -c "mkdir -p /tmp/graphviz_install && cd /tmp/graphviz_install && \
 #    curl -LO https://graphviz.gitlab.io/pub/graphviz/stable/SOURCES/graphviz.tar.gz && \
@@ -90,6 +76,8 @@ RUN yum clean all
 #    cd graphviz* && \
 #    ./configure --with-gts=yes && make && make install && \
 #    cd /tmp && rm -rf /tmp/graphviz_install"
+
+RUN yum clean all
 
 # Create Common App Directories once
 RUN  mkdir -p /apps
@@ -110,8 +98,13 @@ RUN  echo '[[ -s "/apps/sdkman/bin/sdkman-init.sh" ]] && source "/apps/sdkman/bi
 
 # Note Quarterly releases - Jan 21, April 22, etc...
 ENV JDK_VERSION 11.0.8.hs-adpt
-ENV SCALA_VERSION 2.13.3
-ENV SBT_VERSION 1.3.13
+#ENV SCALA_VERSION 2.13.3
+ENV SCALA_VERSION 2.12.12
+
+#ENV SBT_VERSION 1.3.13
+#ENV SBT_VERSION 1.2.1
+# Bug in 1.1.0 when executing sbt
+ENV SBT_VERSION 1.1.6
 
 # Important - these will run in the current user home dir
 # which is /root from the base_os image
@@ -120,12 +113,13 @@ RUN /bin/bash -l -c 'sdk update'
 
 RUN /bin/bash -l -c 'sdk install java "${JDK_VERSION}"'
 RUN /bin/bash -l -c 'sdk install scala "${SCALA_VERSION}"'
+RUN /bin/bash -l -c 'sdk install sbt "${SBT_VERSION}"'
 
 # The piccolo.link url shortener used by SBT team is trash and throws 503s
 # SBT and sdkman teams should stop using piccolo.link
-#RUN /bin/bash -l -c "curl -L https://github.com/sbt/sbt/releases/download/v${SBT_VERSION}/sbt-${SBT_VERSION}.zip -o /apps//root/.sdkman/archives/sbt-${SBT_VERSION}.zip"
-RUN /bin/bash -l -c "curl -L https://github.com/sbt/sbt/releases/download/v${SBT_VERSION}/sbt-${SBT_VERSION}.zip -o /apps/sdkman/archives/sbt-${SBT_VERSION}.zip"
-RUN /bin/bash -l -c 'sdk install sbt "${SBT_VERSION}"'
+##RUN /bin/bash -l -c "curl -L https://github.com/sbt/sbt/releases/download/v${SBT_VERSION}/sbt-${SBT_VERSION}.zip -o /apps//root/.sdkman/archives/sbt-${SBT_VERSION}.zip"
+#RUN /bin/bash -l -c "curl -L https://github.com/sbt/sbt/releases/download/v${SBT_VERSION}/sbt-${SBT_VERSION}.zip -o /apps/sdkman/archives/sbt-${SBT_VERSION}.zip"
+#RUN /bin/bash -l -c 'sdk install sbt "${SBT_VERSION}"'
 
 RUN /bin/bash -l -c "rm -rf /apps/sdkman/archives"  ### reduce image size
 
@@ -143,14 +137,18 @@ RUN /bin/bash -l -c "mkdir -p /apps/bin && \
 ENV PATH /apps/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/tpkg_install/bin
 
 # Init sbt 
-RUN /bin/bash -l -c "cd /apps && mkdir -p sbtinit_${SBT_VERSION}/project && \
-        echo 'sbt.version=${SBT_VERSION}' >> /apps/sbtinit_${SBT_VERSION}/project/build.properties && \
-        cd /apps/sbtinit_${SBT_VERSION} && sbt version"
+RUN /bin/bash -l -c "cd /apps && mkdir -p sbtinit_${SBT_VERSION}/project && echo 'sbt.version=${SBT_VERSION}' >> /apps/sbtinit_${SBT_VERSION}/project/build.properties  && \
+         cd /apps/sbtinit_${SBT_VERSION} && sbt version"
+
+#RUN /bin/bash -l -c "echo 'sbt.version=${SBT_VERSION}' >> /apps/sbtinit_${SBT_VERSION}/project/build.properties "
+#RUN /bin/bash -l -c "ls -al /apps/sbtinit_${SBT_VERSION}"
+#RUN /bin/bash -l -c "cd /apps/sbtinit_${SBT_VERSION} && sbt version"
+#RUN /bin/bash -l -c "sdk use sbt ${SBT_VERSION}"
 
 # Init sbt 1.3.18 -- still used in some apps
-RUN /bin/bash -l -c "cd /apps && mkdir -p sbtinit_1.3.13/project && \
-        echo 'sbt.version=1.3.13' >> /apps/sbtinit_1.3.13/project/build.properties && \
-        cd /apps/sbtinit_1.3.13 && sbt version"
+#RUN /bin/bash -l -c "cd /apps && mkdir -p sbtinit_1.3.13/project && \
+#        echo 'sbt.version=1.3.13' >> /apps/sbtinit_1.3.13/project/build.properties && \
+#        cd /apps/sbtinit_1.3.13 && sbt version"
 
 # There are no suitable defaults to run so drop into bash
 CMD ["bash"]

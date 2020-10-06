@@ -7,8 +7,12 @@ LABEL maintainer=capuz-dev@lists.yellowpages.com
 
 # Note Quarterly releases - Jan 21, April 22, etc...
 ENV JDK_VERSION 11.0.8.hs-adpt
-ENV SCALA_VERSION 2.13.3
-ENV SBT_VERSION 1.3.13
+
+#ENV SCALA_VERSION 2.13.3
+#ENV SBT_VERSION 1.3.13
+
+ENV SCALA_VERSION 2.12.12
+ENV SBT_VERSION 1.1.6
 
 #RUN /bin/bash -l -c 'sdk use java "${JDK_VERSION}"'
 #RUN /bin/bash -l -c 'sdk use scala "${SCALA_VERSION}"'
@@ -52,9 +56,9 @@ RUN rm -rf /capuz_docker/target/ /capuz_docker/project/project /capuz_docker/pro
 #      cat $APP_HOME/project/coursier.sbt >> $HOME/.sbt/0.13/plugins/build.sbt"
 
 # Init sbt
-#RUN /bin/bash -l -c "cd /apps && mkdir -p sbtinit_${SBT_VERSION}/project && \
-#        echo 'sbt.version=${SBT_VERSION}' >> /apps/sbtinit_${SBT_VERSION}/project/build.properties && \
-#        cd /apps/sbtinit_${SBT_VERSION} && sbt version"
+RUN /bin/bash -l -c "cd /apps && mkdir -p sbtinit_${SBT_VERSION}/project && \
+        echo 'sbt.version=${SBT_VERSION}' >> /apps/sbtinit_${SBT_VERSION}/project/build.properties && \
+        cd /apps/sbtinit_${SBT_VERSION} && sbt version"
 
 # Init sbt 0.13.18 -- still used in some apps
 #RUN /bin/bash -l -c "cd /apps && mkdir -p sbtinit_0.13.18/project && \
@@ -72,7 +76,7 @@ RUN /bin/bash -l -c 'cd $APP_HOME && \
 		  export PATH="/apps/sdkman/candidates/scala/current/bin:/apps/sdkman/candidates/sbt/current/bin:/apps/sdkman/candidates/java/current/bin:${PATH}" && \
 		  sdk use java "${JDK_VERSION}" && \
 		  sdk use scala "${SCALA_VERSION}" && \
-			sdk use sbt "${SBT_VERSION}" && \
+    	  sdk use sbt "${SBT_VERSION}" && \
       echo "PATH=${PATH}" && \
       sbt -J-Dsbt.override.build.repos=true -J-Dsbt.repository.config=/apps/.sbt/repositories clean universal:package-zip-tarball && \
       cd "${DIST_HOME}" && \

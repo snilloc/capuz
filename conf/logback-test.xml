@@ -49,13 +49,13 @@
         </encoder>
     </appender>
 
-    <!-- This is TCP appender  - prod may be using UDP -->
+    <!-- This is TCP appender  - prod may be using UDP
     <appender name="GRAYLOG2NP" class="de.siegmar.logbackgelf.GelfTcpAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
-        <graylogHost>graylog-dev-1.np.st1.yellowpages.com</graylogHost>
-        <graylogPort>5555</graylogPort>
+        <graylogHost>yp.com</graylogHost>
+        <graylogPort>333</graylogPort>
         <encoder class="de.siegmar.logbackgelf.GelfEncoder">
             <includeRawMessage>false</includeRawMessage>
             <includeMarker>true</includeMarker>
@@ -68,7 +68,7 @@
             <staticField>environment:${ENVIRONMENT}</staticField>
             <staticField>version:${PACKAGE_VERSION}</staticField>
         </encoder>
-    </appender>
+    </appender -->
 
     <root level="TRACE">
         <appender-ref ref="FILENP" />

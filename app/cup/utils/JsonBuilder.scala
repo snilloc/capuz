@@ -41,7 +41,8 @@ trait JsonExporter {
 class JsonBuilder {
   private val logger: Logger = Logger(this.getClass)
 
-  var seq: Seq[(String, JsValue)] = scala.collection.immutable.Seq.empty[(String, JsValue)]
+  var seq: Seq[(String, JsValue)] =
+    scala.collection.immutable.Seq.empty[(String, JsValue)]
   // var seq: Vector[(String, JsValue)] = Vector.empty[(String, JsValue)] - use if appending more than 10 items
 
   /** remove ALL elements matching s */
@@ -53,7 +54,9 @@ class JsonBuilder {
   def +=(s: String, x: Boolean): Unit = { seq = seq :+ ((s, JsBoolean(x))) }
   def +=(s: String, x: Int): Unit = { seq = seq :+ ((s, JsNumber(x))) }
   def +=(s: String, x: Long): Unit = { seq = seq :+ ((s, JsNumber(x))) }
-  def +=(s: String, x: Float): Unit = { seq = seq :+ ((s, JsNumber(x.toDouble))) }
+  def +=(s: String, x: Float): Unit = {
+    seq = seq :+ ((s, JsNumber(x.toDouble)))
+  }
   def +=(s: String, x: Double): Unit = { seq = seq :+ ((s, JsNumber(x))) }
   def +=(s: String, x: String): Unit = { seq = seq :+ ((s, JsString(x))) }
 
@@ -77,25 +80,41 @@ class JsonBuilder {
     x match {
       case JsDefined(v) =>
         seq = seq :+ ((s, v))
-      case JsUndefined() => logger.warn("Tried to add JsUndefined to JsonBuilder", new Exception(x.toString))
+      case JsUndefined() =>
+        logger.warn("Tried to add JsUndefined to JsonBuilder",
+                    new Exception(x.toString))
     }
   }
-  def +=(s: String, x: Array[Boolean]): Unit = { seq = seq :+ ((s, JsArray(x.map(i => JsBoolean(i))))) }
-  def +=(s: String, x: Array[Int]): Unit = { seq = seq :+ ((s, JsArray(x.map(i => JsNumber(i))))) }
-  def +=(s: String, x: Array[Long]): Unit = { seq = seq :+ ((s, JsArray(x.map(i => JsNumber(i))))) }
-  def +=(s: String, x: Array[Float]): Unit = { seq = seq :+ ((s, JsArray(x.map(i => JsNumber(i.toDouble))))) }
-  def +=(s: String, x: Array[Double]): Unit = { seq = seq :+ ((s, JsArray(x.map(i => JsNumber(i))))) }
-  def +=(s: String, x: Array[String]): Unit = { seq = seq :+ ((s, JsArray(x.map(i => JsString(i))))) }
-  def +=(s: String, x: Array[JsonExporter]): Unit = { seq = seq :+ ((s, JsArray(x.map(i => i.toJson)))) }
-  def +=(s: String, x: Array[JsObject]): Unit = { seq = seq :+ ((s, JsArray(x))) }
+  def +=(s: String, x: Array[Boolean]): Unit = {
+    seq = seq :+ ((s, JsArray(x.map(i => JsBoolean(i)))))
+  }
+  def +=(s: String, x: Array[Int]): Unit = {
+    seq = seq :+ ((s, JsArray(x.map(i => JsNumber(i)))))
+  }
+  def +=(s: String, x: Array[Long]): Unit = {
+    seq = seq :+ ((s, JsArray(x.map(i => JsNumber(i)))))
+  }
+  def +=(s: String, x: Array[Float]): Unit = {
+    seq = seq :+ ((s, JsArray(x.map(i => JsNumber(i.toDouble)))))
+  }
+  def +=(s: String, x: Array[Double]): Unit = {
+    seq = seq :+ ((s, JsArray(x.map(i => JsNumber(i)))))
+  }
+  def +=(s: String, x: Array[String]): Unit = {
+    seq = seq :+ ((s, JsArray(x.map(i => JsString(i)))))
+  }
+  def +=(s: String, x: Array[JsonExporter]): Unit = {
+    seq = seq :+ ((s, JsArray(x.map(i => i.toJson))))
+  }
+  def +=(s: String, x: Array[JsObject]): Unit = {
+    seq = seq :+ ((s, JsArray(x)))
+  }
   def +=(s: String, x: Seq[Any]): Unit = {
-    seq = seq :+ ((
-      s,
-      JsArray(x.map(_ match {
-        case s: String       => JsString(s)
-        case v: JsValue      => v
-        case j: JsonExporter => j.toJson
-      }))))
+    seq = seq :+ ((s, JsArray(x.map(_ match {
+      case s: String       => JsString(s)
+      case v: JsValue      => v
+      case j: JsonExporter => j.toJson
+    }))))
   }
 
   def json: JsObject = JsObject(seq)
@@ -109,31 +128,44 @@ object JsonBuilder {
   val dateFormat2: SimpleDateFormat = new SimpleDateFormat("MM-dd-yyyy")
   val dateFormat3: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
 
-  val isoDateFormat: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+  val isoDateFormat: SimpleDateFormat = new SimpleDateFormat(
+    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
   isoDateFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"))
 
-  val isoDateFormat2: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz")
+  val isoDateFormat2: SimpleDateFormat = new SimpleDateFormat(
+    "yyyy-MM-dd'T'HH:mm:ssz")
   isoDateFormat2.setTimeZone(java.util.TimeZone.getTimeZone("UTC"))
 
-  val isoDateFormat3: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+  val isoDateFormat3: SimpleDateFormat = new SimpleDateFormat(
+    "yyyy-MM-dd'T'HH:mm:ss")
   isoDateFormat3.setTimeZone(java.util.TimeZone.getTimeZone("UTC"))
 
-  def getRequiredValue[T](key: String, json: JsValue)(implicit fjs: Reads[T]): T = {
+  def getRequiredValue[T](key: String, json: JsValue)(
+      implicit fjs: Reads[T]): T = {
     (json \ key).asOpt[T] match {
       case Some(value) => value
-      case _           => throw new Exception("Required " + key + " is missing in " + json)
+      case _ =>
+        throw new Exception("Required " + key + " is missing in " + json)
     }
   }
 
-  def toTimestamp(s: Option[String], defaultValue: Timestamp = new Timestamp(System.currentTimeMillis), fmt: Option[SimpleDateFormat] = None): Timestamp = {
+  def toTimestamp(s: Option[String],
+                  defaultValue: Timestamp = new Timestamp(
+                    System.currentTimeMillis),
+                  fmt: Option[SimpleDateFormat] = None): Timestamp = {
     toTimestampOpt(s, Some(defaultValue), fmt).getOrElse(defaultValue)
   }
 
-  def toTimestampOpt(s: Option[String], defaultValue: Option[Timestamp] = Some(new Timestamp(System.currentTimeMillis)), fmt: Option[SimpleDateFormat] = None): Option[Timestamp] = {
+  def toTimestampOpt(
+      s: Option[String],
+      defaultValue: Option[Timestamp] = Some(
+        new Timestamp(System.currentTimeMillis)),
+      fmt: Option[SimpleDateFormat] = None): Option[Timestamp] = {
     s match {
       case Some(ts) =>
         if (fmt.isDefined) {
-          logger.trace(s"JsonBuilder.toTimestamp parsing ts: ${ts} using fmt: ${fmt.get.toPattern}")
+          logger.trace(
+            s"JsonBuilder.toTimestamp parsing ts: ${ts} using fmt: ${fmt.get.toPattern}")
           Some(new Timestamp(fmt.get.parse(ts).getTime))
         } else if (ts.length >= 20) {
           if (ts.endsWith("Z")) {
@@ -173,15 +205,19 @@ object JsonBuilder {
 
   def verifyYearFormat(date: String, df: SimpleDateFormat): Unit = {
     if (!(Set("19", "20") contains date.substring(0, 2))) {
-      throw new IllegalArgumentException("Date %s does not match the Date Format %s".format(date, df.toPattern))
+      throw new IllegalArgumentException(
+        "Date %s does not match the Date Format %s".format(date, df.toPattern))
     }
   }
 
-  def convertToUTC(s: String, from_str: String, fmt: SimpleDateFormat): Timestamp = {
+  def convertToUTC(s: String,
+                   from_str: String,
+                   fmt: SimpleDateFormat): Timestamp = {
     val from_tz: TimeZone = TimeZone.getTimeZone(from_str)
     val to_tz: TimeZone = TimeZone.getTimeZone("UTC")
     val calendar: Calendar = Calendar.getInstance
-    val ts_offset = from_tz.getOffset(calendar.getTimeInMillis) - to_tz.getOffset(calendar.getTimeInMillis)
+    val ts_offset = from_tz.getOffset(calendar.getTimeInMillis) - to_tz
+      .getOffset(calendar.getTimeInMillis)
 
     fmt.setTimeZone(from_tz)
     val from_date = fmt.parse(s).getTime
@@ -193,21 +229,24 @@ object JsonBuilder {
     val from_tz: TimeZone = TimeZone.getTimeZone("CST")
     val to_tz: TimeZone = TimeZone.getTimeZone("UTC")
     val calendar: Calendar = Calendar.getInstance
-    from_tz.getOffset(calendar.getTimeInMillis) - to_tz.getOffset(calendar.getTimeInMillis)
+    from_tz.getOffset(calendar.getTimeInMillis) - to_tz.getOffset(
+      calendar.getTimeInMillis)
   }
 
   def getUTCESTOffset: Int = {
     val from_tz: TimeZone = TimeZone.getTimeZone("America/New_York")
     val to_tz: TimeZone = TimeZone.getTimeZone("UTC")
     val cal: Calendar = Calendar.getInstance
-    from_tz.getOffset(cal.getTimeInMillis) - to_tz.getOffset(cal.getTimeInMillis)
+    from_tz.getOffset(cal.getTimeInMillis) - to_tz.getOffset(
+      cal.getTimeInMillis)
   }
 
   def getUTCPSTOffset: Int = {
     val from_tz: TimeZone = TimeZone.getTimeZone("PST")
     val to_tz: TimeZone = TimeZone.getTimeZone("UTC")
     val cal: Calendar = Calendar.getInstance
-    from_tz.getOffset(cal.getTimeInMillis) - to_tz.getOffset(cal.getTimeInMillis)
+    from_tz.getOffset(cal.getTimeInMillis) - to_tz.getOffset(
+      cal.getTimeInMillis)
   }
 
   def getFloat(x: JsValue): Float = {
@@ -280,7 +319,10 @@ object JsonBuilder {
       throw new Exception("Cannot parse " + v + " as Double")
   } */
 
-  def flatten(key: String, value: JsValue, map: scala.collection.mutable.Map[String, JsValue]): scala.collection.mutable.Map[String, JsValue] = {
+  def flatten(key: String,
+              value: JsValue,
+              map: scala.collection.mutable.Map[String, JsValue])
+    : scala.collection.mutable.Map[String, JsValue] = {
     value match {
       case o: JsObject =>
         for ((k, v) <- o.value)
@@ -294,7 +336,10 @@ object JsonBuilder {
     map
   }
 
-  def flattenToString(key: String, value: JsValue, map: scala.collection.mutable.Map[String, String]): scala.collection.mutable.Map[String, String] = {
+  def flattenToString(key: String,
+                      value: JsValue,
+                      map: scala.collection.mutable.Map[String, String])
+    : scala.collection.mutable.Map[String, String] = {
     value match {
       case o: JsObject =>
         for ((k, v) <- o.value)
@@ -304,7 +349,10 @@ object JsonBuilder {
         for (i <- 0 until v.size) {
           key match {
             case "lines_of_business" =>
-              flattenToString(key + "(%s)".format((v(i) \ "name").asOpt[String].getOrElse("")), v(i), map)
+              flattenToString(key + "(%s)".format(
+                                (v(i) \ "name").asOpt[String].getOrElse("")),
+                              v(i),
+                              map)
             case _ => flattenToString(key + "(%02d)".format(i), v(i), map)
           }
         }
@@ -313,4 +361,3 @@ object JsonBuilder {
     map
   }
 }
-

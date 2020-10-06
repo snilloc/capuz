@@ -31,7 +31,7 @@ DOCKER_REGISTRY=dev-sysint-501.np.st1.yellowpages.com:5000
 # Build the base_os image using cache if possible
 # Do this in a sub-dir that's empty to keep it as light as possible
 echo
-echo "CentOs 7.6 Java 11.0.x Scala 2.13.3 SBT 1.3.13"
+echo "CentOs 7.6 Java 11.0.x Scala 2.12.12 SBT 1.2.1"
 echo "----------------------------------------------------------------"
 echo
 echo "Capuz BASE: ${BASE_DOCKER_IMAGE_TAG}"

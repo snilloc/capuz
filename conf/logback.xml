@@ -1,5 +1,5 @@
 <!-- https://www.playframework.com/documentation/latest/SettingsLogger -->
-<configuration debug="true" packagingData="true" >
+<configuration debug="false" packagingData="true" >
 
     <!-- Disable all the logback noise due to problems in graylog config -->
     <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
@@ -11,6 +11,7 @@
     <logger name="com.sun.jersey" level="ERROR" />
     <logger name="com.ning.http" level="ERROR" />
     <logger name="com.mchange" level="ERROR" />
+    <logger name="ch.qos.logback" level="ERROR" />
     <logger name="org.lwes" level="ERROR" />
     <logger name="com.google.inject" level="ERROR" />
     <logger name="net.sf" level="ERROR" />
@@ -31,7 +32,7 @@
     <logger name="actors" level="INFO" />
     <logger name="QueryLog" level="INFO" />
 
-    <conversionRule conversionWord="coloredLevel" converterClass="play.api.Logger$ColoredLevel" />
+    <!-- conversionRule conversionWord="coloredLevel" converterClass="play.api.Logger$ColoredLevel" / -->
 
     <appender name="STDOUTNP" class="ch.qos.logback.core.ConsoleAppender">
       <filter class="ch.qos.logback.classic.filter.ThresholdFilter">

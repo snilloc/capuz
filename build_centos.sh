@@ -6,7 +6,6 @@ export DOCKER_BUILDKIT=1
 source ./version_os
 
 #DOCKER_USER="pl"
-#DOCKER_REGISTRY="docker.yp.com"
 DOCKER_REGISTRY=dev-sysint-501.np.st1.yellowpages.com:5000
 
 DOCKER_IMAGE_APP_NAME=capuz_base_os
